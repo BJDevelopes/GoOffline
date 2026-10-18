@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="GoOffline logo">
+  <defs>
+    <linearGradient id="bg" x1="14" y1="14" x2="242" y2="242" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6C5CE7"/>
+      <stop offset="1" stop-color="#FF6B5E"/>
+    </linearGradient>
+    <linearGradient id="hl" x1="0" y1="14" x2="0" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clip"><rect x="14" y="14" width="228" height="228" rx="58"/></clipPath>
+  </defs>
+  <rect x="14" y="14" width="228" height="228" rx="58" fill="url(#bg)"/>
+  <rect x="14" y="14" width="228" height="126" fill="url(#hl)" clip-path="url(#clip)"/>
+  <g fill="none" stroke="#fff" stroke-width="17" stroke-linecap="round">
+    <path d="M99.72 151.72A40 40 0 0 1 156.28 151.72"/>
+    <path d="M74.26 126.26A76 76 0 0 1 181.74 126.26"/>
+    <path d="M48.81 100.81A112 112 0 0 1 207.19 100.81"/>
+  </g>
+  <circle cx="128" cy="180" r="14" fill="#fff"/>
+  <line x1="62" y1="62" x2="194" y2="194" stroke="#3A2A78" stroke-width="30" stroke-linecap="round"/>
+  <line x1="62" y1="62" x2="194" y2="194" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+</svg>

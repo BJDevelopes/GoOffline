@@ -1,0 +1,7 @@
+bin/
+obj/
+publish*/
+.vs/
+*.user
+# Native hook DLLs — built by native/GoOfflineHook/build.ps1 and by CI.
+src/GoOffline/native/*.dll

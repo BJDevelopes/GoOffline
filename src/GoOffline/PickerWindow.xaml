@@ -1,0 +1,60 @@
+<Window x:Class="GoOffline.PickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add a program" Width="520" Height="580" MinWidth="420" MinHeight="420"
+        Background="{StaticResource Bg}" WindowStartupLocation="CenterOwner"
+        Icon="icon.ico" SourceInitialized="Window_SourceInitialized">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Add a program" FontSize="22" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <Border Grid.Row="1" Background="{StaticResource Card}" CornerRadius="10" Padding="12,8" Margin="0,0,0,12">
+            <TextBox x:Name="Search" Background="Transparent" BorderThickness="0" Foreground="{StaticResource Text}"
+                     CaretBrush="{StaticResource Text}" FontSize="14" TextChanged="Search_Changed"/>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="List">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{StaticResource Card}" CornerRadius="10" Padding="12" Margin="0,0,0,6"
+                                MouseLeftButtonUp="Row_Click" Tag="{Binding}" Cursor="Hand">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,12,0"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding ExePath}" FontSize="11"
+                                               Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <StackPanel x:Name="Loading" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="Scanning installed programs…" Foreground="{StaticResource Muted}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="Count" Foreground="{StaticResource Muted}" VerticalAlignment="Center" FontSize="12"/>
+            <Button Grid.Column="1" Content="Browse for .exe…" Style="{StaticResource Pill}" Click="Browse_Click"/>
+        </Grid>
+    </Grid>
+</Window>

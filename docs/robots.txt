@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bjdevelopes.github.io/GoOffline/sitemap.xml

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GoOffline — Block any Windows program from the internet</title>
+<meta name="description" content="GoOffline is a free, open-source Windows app that makes any program act like your internet is unplugged. One switch. No system-wide downtime.">
+<link rel="canonical" href="https://bjdevelopes.github.io/GoOffline/">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#FF5A6E">
+<meta name="color-scheme" content="dark light">
+
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="GoOffline — Block any Windows program from the internet">
+<meta property="og:description" content="Pick a program. Flip the switch. It thinks you have no internet. Free and open source.">
+<meta property="og:url" content="https://bjdevelopes.github.io/GoOffline/">
+<meta property="og:image" content="https://bjdevelopes.github.io/GoOffline/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="GoOffline">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GoOffline — Block any Windows program from the internet">
+<meta name="twitter:description" content="Pick a program. Flip the switch. It thinks you have no internet.">
+<meta name="twitter:image" content="https://bjdevelopes.github.io/GoOffline/assets/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"GoOffline",
+  "operatingSystem":"Windows 10, Windows 11",
+  "applicationCategory":"UtilitiesApplication",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "downloadUrl":"https://github.com/bjdevelopes/GoOffline/releases/latest",
+  "softwareVersion":"0.1.0",
+  "license":"https://opensource.org/licenses/MIT",
+  "image":"https://bjdevelopes.github.io/GoOffline/assets/logo.png",
+  "url":"https://bjdevelopes.github.io/GoOffline/",
+  "description":"GoOffline is a free, open-source Windows app that makes any program act like your internet is unplugged. One switch. No system-wide downtime."
+}
+</script>
+
+<style>
+  :root{
+    --bg:#0E1014; --card:#171A21; --card-hi:#1E222B; --border:#262B36;
+    --text:#F1F3F8; --muted:#8B92A3;
+    --accent:#FF5A6E; --accent-2:#FF8A5B;
+    --radius:14px;
+    --max:1040px;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F7F7FB; --card:#FFFFFF; --card-hi:#F0F2F7; --border:#E6E8EF;
+      --text:#15181F; --muted:#5B6476;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font:16px/1.6 "Inter","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 20px}
+
+  /* nav */
+  nav{display:flex; align-items:center; gap:14px; padding:18px 20px; max-width:var(--max); margin:0 auto}
+  nav img{width:28px; height:28px; border-radius:8px}
+  nav .name{font-weight:700}
+  nav .right{margin-left:auto; display:flex; gap:14px; align-items:center}
+  nav .right a{color:var(--muted); font-size:14px}
+  nav .right a:hover{color:var(--text); text-decoration:none}
+
+  /* hero */
+  .hero{
+    position:relative; padding:72px 20px 48px; text-align:center; overflow:hidden;
+  }
+  .hero::before{
+    content:""; position:absolute; inset:-40% 20% auto 20%; height:60%;
+    background:radial-gradient(ellipse at center, rgba(255,90,110,.22), transparent 60%);
+    filter:blur(40px); pointer-events:none; z-index:0;
+  }
+  .hero > *{position:relative; z-index:1}
+  .hero .logo{width:112px; height:112px; border-radius:28px; display:inline-block; margin-bottom:18px;
+    box-shadow:0 24px 60px rgba(255,90,110,.35), 0 0 0 1px rgba(255,255,255,.04) inset;}
+  h1{font-size:clamp(36px, 6vw, 64px); line-height:1.05; margin:0 0 14px; letter-spacing:-.02em}
+  h1 .grad{background:linear-gradient(135deg,var(--accent-2),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .tagline{font-size:clamp(16px, 2vw, 20px); color:var(--muted); margin:0 auto 28px; max-width:620px}
+  .cta{display:inline-flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:12px;
+    font-weight:600; font-size:15px; border:1px solid var(--border); color:var(--text); background:var(--card);
+    transition:transform .15s ease, background .2s ease;
+  }
+  .btn:hover{transform:translateY(-1px); text-decoration:none; background:var(--card-hi)}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--accent-2),var(--accent)); color:#fff; border:0;
+    box-shadow:0 10px 30px rgba(255,90,110,.4);
+  }
+  .meta{margin-top:16px; color:var(--muted); font-size:13px}
+
+  /* feature grid */
+  section{padding:48px 20px}
+  h2{font-size:28px; margin:0 0 18px; letter-spacing:-.01em}
+  .grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px;
+  }
+  .card h3{margin:0 0 6px; font-size:17px}
+  .card p{margin:0; color:var(--muted); font-size:14.5px}
+
+  /* how it works */
+  .steps{display:grid; gap:14px; grid-template-columns:repeat(3,1fr); margin-top:12px}
+  @media (max-width:720px){ .steps{grid-template-columns:1fr} }
+  .step{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px}
+  .step .num{
+    width:30px; height:30px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--accent-2),var(--accent)); color:#fff; font-weight:700; font-size:14px; margin-bottom:12px;
+  }
+
+  /* faq */
+  details{border-top:1px solid var(--border); padding:14px 0}
+  details:last-child{border-bottom:1px solid var(--border)}
+  summary{cursor:pointer; font-weight:600; list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+"; float:right; color:var(--muted); font-weight:400}
+  details[open] summary::after{content:"–"}
+  details p{color:var(--muted); margin:10px 0 0}
+
+  /* support */
+  .support{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:space-between;
+  }
+  .support .copy{max-width:520px}
+  .support h2{margin:0 0 6px}
+  .support p{margin:0; color:var(--muted)}
+  .bmac{
+    display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px;
+    background:#FFDD00; color:#111 !important; font-weight:700;
+  }
+  .bmac:hover{background:#ffd500; text-decoration:none}
+
+  footer{padding:40px 20px; color:var(--muted); font-size:13px; text-align:center}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="assets/logo.png" alt="">
+  <span class="name">GoOffline</span>
+  <div class="right">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://github.com/bjdevelopes/GoOffline">GitHub ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <img class="logo" src="assets/logo-512.png" alt="GoOffline logo">
+  <h1>Make one program <span class="grad">think the internet is gone.</span></h1>
+  <p class="tagline">GoOffline cuts any Windows app off from the network with a single switch — without touching the rest of your PC.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/bjdevelopes/GoOffline/releases/latest">
+      ⤓ Download for Windows
+    </a>
+    <a class="btn" href="https://github.com/bjdevelopes/GoOffline">⭐ Star on GitHub</a>
+  </div>
+  <div class="meta">Free · Open source · MIT · Windows 10 &amp; 11</div>
+</header>
+
+<section id="features" class="wrap">
+  <h2>Why GoOffline</h2>
+  <div class="grid">
+    <div class="card"><h3>⚡ One switch</h3><p>Pick a program, flip it off. Flip it on. No command line, no services, no reboots.</p></div>
+    <div class="card"><h3>🔒 Just that one app</h3><p>Everything else on your PC stays online — your browser, your downloads, your Discord.</p></div>
+    <div class="card"><h3>🧷 Works when it's running</h3><p>Live connections are reset immediately. Newly launched copies are blocked too.</p></div>
+    <div class="card"><h3>🛡️ Hard mode</h3><p>For programs that still phone home: injects a hook that fails every network call from inside the process.</p></div>
+    <div class="card"><h3>📦 Store apps too</h3><p>Finds Microsoft Store (UWP) apps like Spotify, not just desktop installers.</p></div>
+    <div class="card"><h3>🆓 Really free</h3><p>Open source under MIT. No account, no telemetry, no ads.</p></div>
+  </div>
+</section>
+
+<section id="how" class="wrap">
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h3>Add a program</h3><p>Pick from your installed apps or drop in any .exe.</p></div>
+    <div class="step"><div class="num">2</div><h3>Flip the switch</h3><p>Windows Firewall blocks the app's traffic. Open sockets get reset.</p></div>
+    <div class="step"><div class="num">3</div><h3>Flip it back</h3><p>The rules disappear and the program is online again. That simple.</p></div>
+  </div>
+</section>
+
+<section id="faq" class="wrap">
+  <h2>Questions</h2>
+  <details><summary>Does it slow my PC down?</summary><p>No. It adds a Windows Firewall rule per app. There's no background service when the app is closed.</p></details>
+  <details><summary>Will it work on games with anti-cheat?</summary><p>The firewall side yes — anti-cheat can't bypass a firewall. Hard mode (DLL injection) will not load into protected games like Valorant or Fortnite; use the firewall switch alone there.</p></details>
+  <details><summary>Does it need admin?</summary><p>Yes, once per launch via a UAC prompt. Windows Firewall edits require it.</p></details>
+  <details><summary>Where does it store its list?</summary><p><code>%AppData%\GoOffline\apps.json</code>. Everything else lives in Windows Firewall rules named <code>GoOffline - …</code>.</p></details>
+  <details><summary>What about Mac or Linux?</summary><p>Windows only for now. The firewall APIs it uses are Windows-specific.</p></details>
+</section>
+
+<section class="wrap">
+  <div class="support">
+    <div class="copy">
+      <h2>Enjoying GoOffline?</h2>
+      <p>It's free and always will be. If it saved you some headaches, a coffee goes a long way.</p>
+    </div>
+    <a class="bmac" href="https://buymeacoffee.com/bjdevelopes" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  </div>
+</section>
+
+<footer>
+  © 2026 GoOffline · <a href="https://github.com/bjdevelopes/GoOffline">GitHub</a> ·
+  <a href="https://github.com/bjdevelopes/GoOffline/blob/main/LICENSE">MIT License</a>
+</footer>
+
+</body>
+</html>

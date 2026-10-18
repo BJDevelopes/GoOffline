@@ -1,0 +1,8 @@
+title: GoOffline
+description: Make any Windows program think your internet is unplugged. Free and open source.
+url: https://bjdevelopes.github.io
+baseurl: /GoOffline
+
+# Serve the plain HTML in docs/ without the default Jekyll theme.
+theme: null
+plugins: []
