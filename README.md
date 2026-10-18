@@ -71,7 +71,7 @@ GoOffline is free and always will be. If it saved you time:
 
 <p>
   <a href="https://buymeacoffee.com/bjdevelopes">
-    <img alt="Buy Me a Coffee" src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=☕&slug=bjdevelopes&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" />
+    <img alt="Buy Me a Coffee" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="48" />
   </a>
 </p>
 
