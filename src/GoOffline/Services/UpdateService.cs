@@ -134,49 +134,43 @@ public static class UpdateService
     }
 
     /// <summary>
-    /// Create %ProgramData%\GoOffline\update\&lt;random&gt; and return its path.
+    /// Create a locked-down staging directory and return its path.
     ///
-    /// A pre-existing update\ folder is NOT trusted — an attacker who created it
-    /// first could have left a weak ACL in place. If we find it owned by anyone
-    /// other than Admins/SYSTEM, we nuke it. Then we reapply the protected ACL
-    /// whether or not it existed. The random subdirectory is created fresh with
-    /// the same ACL, so even if the root ever gets widened later, the leaf is
-    /// still locked down and we're the ones who just placed every file in it.
+    /// Location: %SystemRoot%\Temp (i.e. C:\Windows\Temp). Windows ships this with an
+    /// ACL that only grants write access to Administrators and SYSTEM, so a standard
+    /// user cannot have pre-created a hostile subtree underneath it. No ancestor chain
+    /// to validate; the OS already did that at install time.
+    ///
+    /// Defense in depth: we still apply ProtectedAcl() to our random leaf, then re-open
+    /// it and verify owner, ACL protection flag, and absence of reparse points before
+    /// we hand the path back. If anything looks wrong, we abort hard — the caller will
+    /// surface the error in the UI banner.
     /// </summary>
     private static string CreateProtectedWorkDir()
     {
-        var root = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "GoOffline", "update");
+        var sysTemp = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp");
+        if (!Directory.Exists(sysTemp))
+            throw new InvalidOperationException($"System Temp directory missing: {sysTemp}");
+
         var acl = ProtectedAcl();
+        var work = Path.Combine(sysTemp, "GoOffline-" + Path.GetRandomFileName());
+        var workInfo = new DirectoryInfo(work);
+        workInfo.Create(acl);
+
+        // Verify what we just created, not what we asked for.
+        workInfo.Refresh();
+        if ((workInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidOperationException("Staging path became a reparse point — aborting.");
+
+        var sec = workInfo.GetAccessControl();
+        var owner = sec.GetOwner(typeof(SecurityIdentifier)) as SecurityIdentifier;
         var admins = new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null);
         var system = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
+        if (owner == null || !(owner.Equals(admins) || owner.Equals(system)))
+            throw new InvalidOperationException("Staging directory has unexpected owner.");
+        if (!sec.AreAccessRulesProtected)
+            throw new InvalidOperationException("Staging directory inherits permissions — aborting.");
 
-        var rootInfo = new DirectoryInfo(root);
-        if (rootInfo.Exists)
-        {
-            SecurityIdentifier? owner = null;
-            try { owner = (SecurityIdentifier?)rootInfo.GetAccessControl().GetOwner(typeof(SecurityIdentifier)); }
-            catch { /* can't read ACL = don't trust it */ }
-            bool trusted = owner != null && (owner.Equals(admins) || owner.Equals(system));
-            if (!trusted)
-            {
-                try { rootInfo.Delete(recursive: true); } catch { }
-                rootInfo.Refresh();
-            }
-        }
-        if (!rootInfo.Exists)
-        {
-            rootInfo.Create(acl);
-        }
-        else
-        {
-            // Trusted owner — still re-stamp the ACL so any lingering permissive rules go away.
-            try { rootInfo.SetAccessControl(acl); } catch { }
-        }
-
-        var workInfo = new DirectoryInfo(Path.Combine(root, Path.GetRandomFileName()));
-        workInfo.Create(acl);
         return workInfo.FullName;
     }
 
