@@ -53,6 +53,45 @@ public static class ProcessService
     }
 
     /// <summary>pid -> exe path for every process we can inspect.</summary>
+    /// <summary>pid -> parent pid for every process we can see (via Toolhelp snapshot).</summary>
+    public static Dictionary<int, int> ParentMap()
+    {
+        var map = new Dictionary<int, int>();
+        IntPtr snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (snap == InvalidHandle) return map;
+        try
+        {
+            var pe = new PROCESSENTRY32W { dwSize = (uint)Marshal.SizeOf<PROCESSENTRY32W>() };
+            if (Process32FirstW(snap, ref pe))
+                do { map[(int)pe.th32ProcessID] = (int)pe.th32ParentProcessID; }
+                while (Process32NextW(snap, ref pe));
+        }
+        finally { CloseHandle(snap); }
+        return map;
+    }
+
+    private const uint TH32CS_SNAPPROCESS = 0x00000002;
+    private static readonly IntPtr InvalidHandle = new(-1);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint pid);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool Process32FirstW(IntPtr snap, ref PROCESSENTRY32W pe);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool Process32NextW(IntPtr snap, ref PROCESSENTRY32W pe);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct PROCESSENTRY32W
+    {
+        public uint dwSize, cntUsage, th32ProcessID;
+        public IntPtr th32DefaultHeapID;
+        public uint th32ModuleID, cntThreads, th32ParentProcessID;
+        public int pcPriClassBase;
+        public uint dwFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string szExeFile;
+    }
+
     public static Dictionary<int, string> Snapshot()
     {
         var map = new Dictionary<int, string>();

@@ -37,7 +37,11 @@ public partial class MainWindow : Window
         foreach (var s in stored)
         {
             if (seen.Add(s.Path))
-                _apps.Add(new AppEntry(s.Path) { IsOffline = blocked.Contains(s.Path), HardMode = s.HardMode });
+            {
+                var entry = new AppEntry(s.Path) { IsOffline = blocked.Contains(s.Path), HardMode = s.HardMode };
+                if (s.ExtraBlocked != null) entry.ExtraBlocked = new List<string>(s.ExtraBlocked);
+                _apps.Add(entry);
+            }
         }
         foreach (var p in blocked)
             if (seen.Add(p)) _apps.Add(new AppEntry(p) { IsOffline = true });
@@ -46,6 +50,49 @@ public partial class MainWindow : Window
         _timer.Tick += async (_, _) => await RefreshRunningAsync();
         _timer.Start();
         _ = RefreshRunningAsync();
+        _ = CheckForUpdateAsync();
+    }
+
+    // ---- auto-update -----------------------------------------------------------
+
+    private ReleaseInfo? _pendingUpdate;
+
+    private async Task CheckForUpdateAsync()
+    {
+        var r = await UpdateService.CheckAsync();
+        if (r == null) return;
+        _pendingUpdate = r;
+        UpdateTitle.Text = $"GoOffline {r.Tag} is available";
+        UpdateSubtitle.Text = r.Size > 0
+            ? $"You're on v{UpdateService.CurrentVersion}. Update is {r.Size / (1024.0 * 1024.0):0.0} MB."
+            : $"You're on v{UpdateService.CurrentVersion}.";
+        UpdateBanner.Visibility = Visibility.Visible;
+    }
+
+    private void UpdateDismiss_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateBanner.Visibility = Visibility.Collapsed;
+        _pendingUpdate = null;
+    }
+
+    private async void UpdateInstall_Click(object sender, RoutedEventArgs e)
+    {
+        if (_pendingUpdate == null) return;
+        var r = _pendingUpdate;
+        UpdateTitle.Text = $"Downloading GoOffline {r.Tag}…";
+        UpdateSubtitle.Text = "0%";
+        var progress = new Progress<double>(p =>
+            UpdateSubtitle.Text = $"{p * 100:0}% — GoOffline will restart when done.");
+        try
+        {
+            await UpdateService.InstallAsync(r, progress);
+            // InstallAsync shuts the app down after launching the swap script.
+        }
+        catch (Exception ex)
+        {
+            UpdateTitle.Text = "Update failed";
+            UpdateSubtitle.Text = ex.Message;
+        }
     }
 
     private void Window_SourceInitialized(object? sender, EventArgs e)
@@ -56,7 +103,8 @@ public partial class MainWindow : Window
 
     private void SetStatus(string text) => StatusText.Text = text;
 
-    private void Save() => AppStore.Save(_apps.Select(a => new StoredApp(a.Path, a.HardMode)));
+    private void Save() => AppStore.Save(_apps.Select(a =>
+        new StoredApp(a.Path, a.HardMode, a.ExtraBlocked.Count == 0 ? null : new List<string>(a.ExtraBlocked))));
 
     // ---- adding ----------------------------------------------------------------
 
@@ -103,25 +151,34 @@ public partial class MainWindow : Window
         {
             if (goOffline)
             {
-                FirewallService.Block(app.Path);
+                // Universal: block the whole install folder + any running descendants,
+                // not just the main exe. Catches helper .exes, auto-updaters, licensing
+                // daemons, and child processes that keep the socket on their own.
+                var blocked = UniversalBlockService.BlockAll(app.Path);
+                app.ExtraBlocked = blocked;
                 app.IsOffline = true;
-                int cut = CutConnections(app.Path);
+                int cut = 0;
+                foreach (var p in blocked) cut += CutConnections(p);
                 var extra = app.HardMode ? ApplyHardMode(app) : "";
-                SetStatus($"{app.Name} is offline" +
+                int helpers = blocked.Count - 1;
+                string helperBlurb = helpers > 0 ? $", {helpers} helper .exe(s)" : "";
+                SetStatus($"{app.Name} is offline" + helperBlurb +
                     (cut > 0 ? $" — dropped {cut} connection(s)" : "") + extra + ".");
 
-                // The firewall rule targets this exact file. If a differently-located copy of the
-                // same program is running, it's a separate .exe to Windows and keeps its network.
                 var stray = FindStrayCopies(app.Path);
                 if (stray.Count > 0)
                     SetStatus($"Heads up: another copy of {app.Name} is running from {stray[0]} " +
                               "— add that .exe too (Add program → Browse) to block it.");
+                Save();
             }
             else
             {
-                FirewallService.Unblock(app.Path);
+                var toClear = app.ExtraBlocked.Count > 0 ? app.ExtraBlocked : new List<string> { app.Path };
+                UniversalBlockService.UnblockAll(toClear);
+                app.ExtraBlocked = new();
                 app.IsOffline = false;
                 SetStatus($"{app.Name} is back online.");
+                Save();
             }
         }
         catch (Exception ex)
@@ -154,6 +211,26 @@ public partial class MainWindow : Window
             .Where(kv => kv.Value.Equals(exePath, StringComparison.OrdinalIgnoreCase))
             .Select(kv => kv.Key).ToList();
         return ProcessService.ResetConnections(pids);
+    }
+
+    /// <summary>Descendants of each offline app's live processes whose paths aren't blocked yet.</summary>
+    private List<(AppEntry app, string path)> DiscoverNewChildren()
+    {
+        var results = new List<(AppEntry, string)>();
+        var snapshot = ProcessService.Snapshot();
+        foreach (var app in _apps.Where(a => a.IsOffline))
+        {
+            var rootPids = snapshot
+                .Where(kv => kv.Value.Equals(app.Path, StringComparison.OrdinalIgnoreCase))
+                .Select(kv => kv.Key).ToList();
+            if (rootPids.Count == 0) continue;
+            foreach (var path in UniversalBlockService.DescendantsOf(rootPids).Values.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (app.ExtraBlocked.Contains(path, StringComparer.OrdinalIgnoreCase)) continue;
+                results.Add((app, path));
+            }
+        }
+        return results;
     }
 
     /// <summary>Paths of running processes with the same exe name but a different location.</summary>
@@ -206,6 +283,24 @@ public partial class MainWindow : Window
             // Re-apply Hard mode to any newly-spawned processes of hard-mode apps.
             foreach (var a in _apps.Where(a => a.IsOffline && a.HardMode && a.IsRunning).ToList())
                 _ = Task.Run(() => InjectionService.InjectAll(a.Path));
+
+            // Catch new descendants spawned since the switch was flipped: if the main exe
+            // is running and spawned a child whose path we haven't blocked yet, block it now.
+            var discovered = await Task.Run(() => DiscoverNewChildren());
+            if (discovered.Count > 0)
+            {
+                foreach (var (app, newPath) in discovered)
+                {
+                    try
+                    {
+                        FirewallService.Block(newPath);
+                        if (!app.ExtraBlocked.Contains(newPath, StringComparer.OrdinalIgnoreCase))
+                            app.ExtraBlocked.Add(newPath);
+                    }
+                    catch { /* best effort */ }
+                }
+                Save();
+            }
 
             // Quietly watch for stray copies of blocked apps running from unexpected paths.
             // Only mention them when the status bar is otherwise idle, so we don't nag.

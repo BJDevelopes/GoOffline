@@ -12,6 +12,10 @@ public class AppEntry : INotifyPropertyChanged
     private bool _isRunning;
     private bool _hardMode;
 
+    /// <summary>Every exe path a GoOffline rule currently exists for because of this app.
+    /// Includes the main exe plus siblings in the install folder plus any discovered descendants.</summary>
+    public List<string> ExtraBlocked { get; set; } = new();
+
     public AppEntry(string path)
     {
         Path = path;

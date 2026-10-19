@@ -8,12 +8,34 @@
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Update banner (hidden until an update is available) -->
+        <Border x:Name="UpdateBanner" Grid.Row="0" Visibility="Collapsed"
+                CornerRadius="12" Padding="14,12" Margin="0,0,0,14"
+                Background="{StaticResource AccentSoft}" BorderBrush="{StaticResource Accent}" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="UpdateTitle" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBlock x:Name="UpdateSubtitle" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Later" Style="{StaticResource Pill}" Padding="12,6"
+                        Background="Transparent" Click="UpdateDismiss_Click" Margin="0,0,8,0"/>
+                <Button Grid.Column="2" Content="Update now" Style="{StaticResource PrimaryPill}"
+                        Padding="14,6" Click="UpdateInstall_Click"/>
+            </Grid>
+        </Border>
+
         <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,18">
+        <Grid Grid.Row="1" Margin="0,0,0,18">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -34,7 +56,7 @@
         </Grid>
 
         <!-- List -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="AppList">
                     <ItemsControl.ItemTemplate>
@@ -93,7 +115,7 @@
         </Grid>
 
         <!-- Footer -->
-        <Grid Grid.Row="2" Margin="0,14,0,0">
+        <Grid Grid.Row="3" Margin="0,14,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

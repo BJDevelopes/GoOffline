@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace GoOffline.Services;
 
-public record StoredApp(string Path, bool HardMode);
+public record StoredApp(string Path, bool HardMode, List<string>? ExtraBlocked = null);
 
 /// <summary>Remembers which programs the user added and their per-app settings.</summary>
 public static class AppStore
